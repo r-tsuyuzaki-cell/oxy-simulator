@@ -282,6 +282,29 @@ tbody tr.is-total td{border-top:1.5px solid var(--ink);font-weight:700;backgroun
       </div>
 
       <div class="panel">
+        <h2>在庫と発注</h2>
+        <div class="grid2">
+          <div class="fld">
+            <label for="lot"><span class="fld-name">初期ロット（個）</span></label>
+            <input type="number" id="lot" step="100">
+          </div>
+          <div class="fld">
+            <label for="lotSize"><span class="fld-name">発注ロット（個）</span></label>
+            <input type="number" id="lotSize" step="1000">
+          </div>
+        </div>
+        <div class="fld">
+          <label for="lead"><span class="fld-name">リードタイム</span><span class="fld-val" id="leadv"></span></label>
+          <input type="range" id="lead" min="0" max="8" step="0.5">
+        </div>
+        <div class="fld">
+          <label for="safety"><span class="fld-name">安全在庫</span><span class="fld-val" id="safetyv"></span></label>
+          <input type="range" id="safety" min="0" max="4" step="0.5">
+        </div>
+        <p class="hint">発注してから納品されるまでの月数と、常に持っておきたい在庫の月数。発注ロットの単価は経済原価を使います。</p>
+      </div>
+
+      <div class="panel">
         <h2>獲得と原価</h2>
         <div class="fld">
           <label for="cpo"><span class="fld-name">実CPO</span><span class="fld-val" id="cpov"></span></label>
@@ -297,15 +320,9 @@ tbody tr.is-total td{border-top:1.5px solid var(--ink);font-weight:700;backgroun
             <input type="number" id="c2" step="5">
           </div>
         </div>
-        <div class="grid2">
-          <div class="fld">
-            <label for="lot"><span class="fld-name">初期ロット（個）</span></label>
-            <input type="number" id="lot" step="100">
-          </div>
-          <div class="fld">
-            <label for="logi"><span class="fld-name">物流費/件</span></label>
-            <input type="number" id="logi" step="10">
-          </div>
+        <div class="fld">
+          <label for="logi"><span class="fld-name">物流費/件</span></label>
+          <input type="number" id="logi" step="10">
         </div>
         <div class="fld">
           <label for="pay"><span class="fld-name">決済手数料</span><span class="fld-val" id="payv"></span></label>
@@ -348,9 +365,10 @@ tbody tr.is-total td{border-top:1.5px solid var(--ink);font-weight:700;backgroun
       <div class="panel">
         <h2>モールと固定費</h2>
         <div class="fld">
-          <label for="mr"><span class="fld-name">モール売上比率</span><span class="fld-val" id="mrv"></span></label>
+          <label for="mr"><span class="fld-name">広告対比のモール獲得件数割合</span><span class="fld-val" id="mrv"></span></label>
           <input type="range" id="mr" min="0" max="200" step="5">
         </div>
+        <p class="hint">100% ＝ 広告で獲得した件数と同数がモールでも売れる想定。既存リストとリピートは母数に含めません。</p>
         <div class="fld">
           <label for="mm"><span class="fld-name">モール貢献粗利率</span><span class="fld-val" id="mmv"></span></label>
           <input type="range" id="mm" min="0" max="80" step="1">
@@ -359,7 +377,7 @@ tbody tr.is-total td{border-top:1.5px solid var(--ink);font-weight:700;backgroun
           <label for="fx"><span class="fld-name">固定費/月（人件費除く）</span></label>
           <input type="number" id="fx" step="50000">
         </div>
-        <p class="hint">モール売上比率100% ＝ D2C売上と同額がモールで立つ想定。固定費に人件費は含めていません。</p>
+        <p class="hint">固定費に人件費は含めていません。</p>
       </div>
 
       <div class="panel">
@@ -449,8 +467,25 @@ tbody tr.is-total td{border-top:1.5px solid var(--ink);font-weight:700;backgroun
 
       <section class="sec">
         <div class="sec-head">
+          <h2>発注計画</h2>
+          <p>需要予測から逆算した、欠品しないための発注スケジュールです。リードタイムと安全在庫を満たすように、発注ロット単位で自動計算しています。</p>
+        </div>
+        <div id="orderNote"></div>
+        <div class="tscroll">
+          <table>
+            <thead><tr>
+              <th>#</th><th>発注する時期</th><th>発注個数</th><th>発注金額</th>
+              <th>入荷時期</th><th>入荷後の在庫</th>
+            </tr></thead>
+            <tbody id="orderBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="sec">
+        <div class="sec-head">
           <h2 id="plTitle">12ヶ月 P&amp;L</h2>
-          <p>粗利益 ＝ D2C粗利 ＋ モール貢献。貢献利益 ＝ 粗利益 − 広告費 − 固定費。<b>人件費とその他販管費は含んでいないため、営業利益ではありません。</b>既存リストへの販売は1ヶ月目に計上します。</p>
+          <p>粗利益 ＝ D2C粗利 ＋ モール貢献。貢献利益 ＝ 粗利益 − 広告費 − 固定費。<b>人件費とその他販管費は含んでいないため、営業利益ではありません。</b>モール件数は広告経由の獲得件数を母数に計算し、客単価はD2Cと同じと仮定しています。個数はD2C＋モールの合計です。</p>
         </div>
         <div class="period" role="group" aria-label="シミュレーション期間">
           <span class="period-label">期間</span>
@@ -461,7 +496,8 @@ tbody tr.is-total td{border-top:1.5px solid var(--ink);font-weight:700;backgroun
         <div class="tscroll pl-scroll">
           <table>
             <thead><tr>
-              <th>月</th><th>件数</th><th>個数</th><th>個数/件</th>
+              <th>月</th><th>広告件数</th><th>D2C件数</th><th>モール件数</th>
+              <th>個数</th><th>個数/件</th>
               <th>D2C売上</th><th>原価率</th><th>D2C粗利</th><th>モール貢献</th>
               <th>粗利益</th><th>広告費</th><th>貢献利益</th><th>累計</th><th>在庫残</th>
             </tr></thead>
@@ -473,7 +509,7 @@ tbody tr.is-total td{border-top:1.5px solid var(--ink);font-weight:700;backgroun
       <p class="foot">
         <b>この表に人件費は入っていません。</b>貢献利益から人件費・その他販管費を差し引いた残りが営業利益になります。1人あたり年600万円で3名を配置すると月150万円、12ヶ月で1,800万円が貢献利益から減る計算です。<br>
         原価は初期ロットを使い切るまで初期単価、以降は経済ロット単価で自動的に切り替わります。在庫残がマイナスの月は、その時点で追加ロットの納品が済んでいる前提です。<br>
-        モール貢献は「モール売上 × 貢献粗利率」の簡易計算で、モール側の広告費・手数料は貢献粗利率に含まれているものとして扱っています。
+        モール件数 ＝ 広告経由の獲得件数 × 広告対比のモール獲得件数割合。既存リストとリピートは母数に含めません。モール売上はD2Cと同じ客単価で計算し、モール貢献は「モール売上 × 貢献粗利率」の簡易計算です。モール側の広告費・手数料は貢献粗利率に含まれているものとして扱っています。<br>在庫と累計個数はD2C＋モールの合計で計算しています。原価率はD2C分のみの数値です。
       </p>
 
     </main>
@@ -484,7 +520,7 @@ tbody tr.is-total td{border-top:1.5px solid var(--ink);font-weight:700;backgroun
 const DEFAULTS={
   p1:4980,p3:10800,p6:17800,p10:25000,
   m1:15,m6:35,ur:10,
-  cpo:8500,c1:645,c2:560,lot:3000,logi:580,pay:3.5,
+  cpo:8500,c1:645,c2:560,lot:3000,lotSize:10000,lead:3,safety:1,logi:580,pay:3.5,
   ad1:2000000,adcap:5000000,adg:10,listn:15000,listr:0.5,rep:3,
   mr:100,mm:40,fx:300000,
   sz:500,dose:18.7,freq:8.5
@@ -560,14 +596,23 @@ function compute(v){
   }
 
   // 期間シミュレーション
-  const rows=[]; let ad=v.ad1, cumCust=0, usedInit=0, cumCF=0, cumUnits=0, stockOut=null, cumCost=0;
+  const rows=[]; let ad=v.ad1, cumCust=0, usedInit=0, cumCF=0, cumUnits=0, stockOut=null,
+                     cumCost=0, cumD2CUnits=0, cumMallOrders=0;
   for(let m=1;m<=MONTHS;m++){
     const adm=Math.min(ad, v.adcap);
-    const newO=adm/v.cpo;
+    const newO=adm/v.cpo;                        // 広告経由の獲得件数
     const listO=(m===1)? v.listn*(v.listr/100) : 0;
     const repO =cumCust*(v.rep/100);
     const orders=newO+listO+repO;
-    const units=orders*unitsPerOrder;
+    const units=orders*unitsPerOrder;             // D2C個数
+
+    // モール：広告経由の獲得件数を母数にする
+    const mallOrders=newO*(v.mr/100);
+    const mallUnits =mallOrders*unitsPerOrder;
+    const mallRev   =mallOrders*blendRev;
+    const mallGP    =mallRev*(v.mm/100);
+
+    const totUnits=units+mallUnits;               // 生産・在庫はD2C＋モール
 
     const fromInit=Math.max(0,Math.min(units, v.lot-usedInit));
     usedInit+=fromInit;
@@ -577,31 +622,68 @@ function compute(v){
     const uGP=gross(us.price,10,bc,v);
     const d2cRev=orders*blendRev;
     const d2cGP =orders*((1-r)*fGP + r*uGP);
-    const mallRev=d2cRev*(v.mr/100);
-    const mallGP =mallRev*(v.mm/100);
     const gpTotal=d2cGP+mallGP;                 // 粗利益（人件費前）
     const cont=gpTotal-adm-v.fx;                // 貢献利益（人件費・その他販管費前）
     const cost=units*bc;
-    cumCF+=cont; cumCust+=orders; cumUnits+=units; cumCost+=cost;
+    cumCF+=cont; cumCust+=orders; cumUnits+=totUnits; cumCost+=cost;
+    cumD2CUnits+=units; cumMallOrders+=mallOrders;
     if(stockOut===null && cumUnits>=v.lot) stockOut=m;
 
-    rows.push({m,ad:adm,orders,units,d2cRev,d2cGP,mallGP,gpTotal,cont,cum:cumCF,
+    rows.push({m,ad:adm,orders,newO,units,mallOrders,mallUnits,totUnits,
+               d2cRev,d2cGP,mallRev,mallGP,gpTotal,cont,cum:cumCF,
                stock:v.lot-cumUnits,cost,cr:cost/d2cRev,upo:units/orders});
     ad*=(1+v.adg/100);
   }
 
   const totRev=rows.reduce((a,x)=>a+x.d2cRev,0);
   const totOrders=rows.reduce((a,x)=>a+x.orders,0);
+
+  /* ---- 発注計画（リードタイム・安全在庫・発注ロット） ---- */
+  const LT=Math.round(v.lead), LOT=Math.max(1,v.lotSize), SF=v.safety;
+  const dem=rows.map(x=>x.totUnits);                  // 月次需要（D2C＋モール）
+  const cum=[]; dem.reduce((a,d,i)=>cum[i]=a+d,0);
+  const demAt=i=>dem[Math.min(Math.max(i,0),dem.length-1)]||0;
+  const cumAt=i=>i<1?0:cum[Math.min(i,cum.length)-1];
+
+  const plan=[]; let supply=v.lot;
+  for(let m=-LT;m<=MONTHS;m++){
+    const h=m+LT;                                     // 入荷月
+    const eff=Math.max(1,h);                          // 実際に使える最初の月
+    if(eff>MONTHS) break;
+    const need=cumAt(eff)+SF*demAt(eff);              // 入荷月末までの累計需要＋安全在庫
+    if(supply<need-0.5){
+      const qty=Math.ceil((need-supply)/LOT)*LOT;
+      supply+=qty;
+      plan.push({placed:m,arrive:h,qty,cost:qty*v.c2});
+    }
+  }
+
+  // 入荷を反映した実在庫（arrive<1 の発注は販売開始時点で手元にある）
+  let oh=v.lot+plan.filter(o=>o.arrive<1).reduce((a,o)=>a+o.qty,0);
+  let shortMonth=null;
+  rows.forEach((r,i)=>{
+    const mm=i+1;
+    plan.forEach(o=>{ if(o.arrive===mm){ oh+=o.qty; o.after=oh; } });
+    oh-=r.totUnits;
+    r.onHand=oh;
+    if(shortMonth===null&&oh<0) shortMonth=mm;
+  });
+  plan.forEach(o=>{ if(o.arrive<1) o.after=v.lot+plan.filter(x=>x.arrive<1&&x.placed<=o.placed).reduce((a,x)=>a+x.qty,0); });
+
   return {skus,front,us,frontGP,blendGP,blendRev,unitsPerOrder,usesPer,needR,rows,cumUnits,stockOut,
-          totRev, totOrders, cumCost,
-          totMall:totRev*(v.mr/100),
+          totRev, totOrders, cumCost, cumD2CUnits, cumMallOrders,
+          plan, shortMonth, LT, LOT,
+          totOrderCost:plan.reduce((a,o)=>a+o.cost,0),
+          totOrderQty:plan.reduce((a,o)=>a+o.qty,0),
+          totMall:rows.reduce((a,x)=>a+x.mallRev,0),
           totD2CGP:rows.reduce((a,x)=>a+x.d2cGP,0),
           totMallGP:rows.reduce((a,x)=>a+x.mallGP,0),
           totGP:rows.reduce((a,x)=>a+x.gpTotal,0),      // 粗利益 合計
           totAd:rows.reduce((a,x)=>a+x.ad,0),
-          avgUnits:cumUnits/totOrders,          // 平均販売個数（1件あたり）
-          avgCR:cumCost/totRev,                 // 平均原価率（実現ベース）
-          steadyCR:(unitsPerOrder*v.c2)/blendRev, // 平均原価率（経済ロット単価ベース）
+          totMallUnits:rows.reduce((a,x)=>a+x.mallUnits,0),
+          avgUnits:cumD2CUnits/totOrders,       // 平均販売個数（1件あたり）
+          avgCR:cumCost/totRev,                 // 平均原価率（実現ベース・D2C）
+          steadyCR:(unitsPerOrder*v.c2)/blendRev,
           last:rows[rows.length-1]};
 }
 
@@ -774,13 +856,57 @@ function renderLife(v,c){
   }
 }
 
+function renderOrders(v,c){
+  const n=x=>Math.round(x).toLocaleString('ja-JP');
+  const when=m=> m<1 ? `販売開始 ${Math.abs(m)===0?'時点':Math.abs(m)+'ヶ月前'}` : `${m}ヶ月目`;
+  const whenA=m=> m<1 ? '販売開始まで' : `${m}ヶ月目`;
+
+  if(c.plan.length===0){
+    $('orderBody').innerHTML=`<tr><td colspan="6" style="text-align:center;color:var(--ink-3)">初期ロット ${n(v.lot)}個で ${MONTHS}ヶ月まかなえます。追加発注は不要です。</td></tr>`;
+  }else{
+    $('orderBody').innerHTML=c.plan.map((o,i)=>`
+      <tr class="${o.placed<1?'is-us':''}">
+        <td>${i+1}</td>
+        <td style="font-family:var(--jp)">${when(o.placed)}</td>
+        <td>${n(o.qty)}個</td>
+        <td>${yen(o.cost)}</td>
+        <td style="font-family:var(--jp)">${whenA(o.arrive)}</td>
+        <td>${o.after!=null?n(o.after)+'個':'—'}</td>
+      </tr>`).join('')
+      + `<tr class="is-total"><td>計</td><td>${c.plan.length}回</td>
+         <td>${n(c.totOrderQty)}個</td><td>${yen(c.totOrderCost)}</td><td>—</td><td>—</td></tr>`;
+  }
+
+  const first=c.plan[0], el=$('orderNote');
+  if(c.plan.length===0){
+    el.className='note is-ok';
+    el.innerHTML=`リードタイム ${c.LT}ヶ月・安全在庫 ${v.safety}ヶ月分の条件で、追加発注なしで足ります。`;
+  }else if(first.placed<1){
+    el.className='note is-bad';
+    el.innerHTML=`<b>1回目の発注は「販売開始 ${Math.abs(first.placed)}ヶ月前」です。</b>`
+      +`リードタイム ${c.LT}ヶ月なので、${n(first.qty)}個（${yen(first.cost)}）を今すぐ動かさないと、初月から欠品します。`
+      +`${MONTHS}ヶ月で計 ${c.plan.length}回・${n(c.totOrderQty)}個・${yen(c.totOrderCost)} の発注が必要です。`;
+  }else{
+    el.className='note';
+    el.innerHTML=`1回目の発注は <b>${first.placed}ヶ月目</b>（入荷 ${whenA(first.arrive)}）。`
+      +`${MONTHS}ヶ月で計 ${c.plan.length}回・${n(c.totOrderQty)}個・${yen(c.totOrderCost)} の発注が必要です。`;
+  }
+  if(c.shortMonth!==null){
+    el.className='note is-bad';
+    el.innerHTML+=`<br><b>この条件では ${c.shortMonth}ヶ月目に欠品します。</b>リードタイムを短くするか、発注ロットを大きくしてください。`;
+  }
+}
+
 function renderPL(v,c){
   const mark=MONTHS<=12?[1,3,6,9,12]:[1,3,6,12,18,24];
+  const n=x=>Math.round(x).toLocaleString('ja-JP');
   $('plBody').innerHTML=c.rows.map(r=>`
     <tr class="${mark.includes(r.m)?'is-mark':''}">
       <td>${r.m}</td>
-      <td>${Math.round(r.orders).toLocaleString('ja-JP')}</td>
-      <td>${Math.round(r.units).toLocaleString('ja-JP')}</td>
+      <td>${n(r.newO)}</td>
+      <td>${n(r.orders)}</td>
+      <td>${n(r.mallOrders)}</td>
+      <td>${n(r.totUnits)}</td>
       <td>${r.upo.toFixed(2)}</td>
       <td>${yen(r.d2cRev)}</td>
       <td>${pct(r.cr*100)}</td>
@@ -789,12 +915,14 @@ function renderPL(v,c){
       <td>${man(r.ad)}</td>
       <td class="${r.cont>=0?'pos':'neg'}">${yen(r.cont)}</td>
       <td class="${r.cum>=0?'pos':'neg'}">${yen(r.cum)}</td>
-      <td class="${r.stock<0?'neg':''}">${Math.round(r.stock).toLocaleString('ja-JP')}</td>
+      <td class="${r.onHand<0?'neg':''}">${n(r.onHand)}</td>
     </tr>`).join('')
     + `<tr class="is-total">
         <td>累計</td>
-        <td>${Math.round(c.totOrders).toLocaleString('ja-JP')}</td>
-        <td>${Math.round(c.cumUnits).toLocaleString('ja-JP')}</td>
+        <td>${n(c.rows.reduce((a,x)=>a+x.newO,0))}</td>
+        <td>${n(c.totOrders)}</td>
+        <td>${n(c.cumMallOrders)}</td>
+        <td>${n(c.cumUnits)}</td>
         <td>${c.avgUnits.toFixed(2)}</td>
         <td>${yen(c.totRev)}</td>
         <td>${pct(c.avgCR*100)}</td>
@@ -807,17 +935,9 @@ function renderPL(v,c){
         <td>—</td>
       </tr>`;
 
-  const m1u=c.rows[0].units, el=$('stockNote');
-  if(c.stockOut===null){
-    el.className='note is-ok';
-    el.innerHTML=`初期ロット ${v.lot.toLocaleString('ja-JP')}個で ${MONTHS}ヶ月もちます（累計 ${Math.round(c.cumUnits).toLocaleString('ja-JP')}個）。`;
-  }else if(c.stockOut===1){
-    el.className='note is-bad';
-    el.innerHTML=`<b>初期ロット ${v.lot.toLocaleString('ja-JP')}個は1ヶ月目で尽きます。</b>初月だけで ${Math.round(m1u).toLocaleString('ja-JP')}個。追加ロットの発注は販売開始前に完了させる必要があります。`;
-  }else{
-    el.className='note';
-    el.innerHTML=`初期ロット ${v.lot.toLocaleString('ja-JP')}個は <b>${c.stockOut}ヶ月目</b>で尽きます（初月使用 ${Math.round(m1u).toLocaleString('ja-JP')}個）。それまでに追加ロットの納品を終えてください。`;
-  }
+  const el=$('stockNote'), m1=c.rows[0];
+  el.className='note';
+  el.innerHTML=`在庫残は発注計画の入荷を反映した実在庫です。初月の消費は ${n(m1.totUnits)}個（D2C ${n(m1.units)} ＋ モール ${n(m1.mallUnits)}）。`;
 }
 
 function labels(v){
@@ -830,6 +950,8 @@ function labels(v){
   $('repv').textContent=pct(v.rep); $('mrv').textContent=pct(v.mr,0);
   $('mmv').textContent=pct(v.mm,0);
   $('freqv').textContent=v.freq.toFixed(1)+'回/月';
+  $('leadv').textContent=v.lead.toFixed(1)+'ヶ月';
+  $('safetyv').textContent=v.safety.toFixed(1)+'ヶ月分';
   const b=$('mixbar').children;
   b[0].style.width=v.m1+'%'; b[1].style.width=v.m3+'%'; b[2].style.width=v.m6+'%';
 }
@@ -838,9 +960,9 @@ function labels(v){
 const LABELS={
   p1:'1個の価格',p3:'3個の価格',p6:'6個の価格',p10:'10個の価格',
   m1:'1個の構成比',m6:'6個の構成比',ur:'引き上げ率',cpo:'CPO',
-  c1:'初期原価',c2:'経済原価',lot:'初期ロット',logi:'物流費',pay:'決済手数料',
+  c1:'初期原価',c2:'経済原価',lot:'初期ロット',lotSize:'発注ロット',lead:'リードタイム',safety:'安全在庫',logi:'物流費',pay:'決済手数料',
   ad1:'初月広告費',adcap:'広告上限',adg:'広告増加率',listn:'既存リスト',listr:'リスト購入率',
-  rep:'リピート率',mr:'モール売上比率',mm:'モール貢献粗利率',fx:'固定費',
+  rep:'リピート率',mr:'モール件数割合',mm:'モール貢献粗利率',fx:'固定費',
   sz:'内容量',dose:'平均使用量',freq:'使用頻度'
 };
 
@@ -891,7 +1013,7 @@ function run(){
   const v=read(); const c=compute(v);
   labels(v); updateURL(v);
   renderVerdict(v,c); renderWater(v,c); renderSKU(v,c);
-  renderComp(v,c); renderLife(v,c); renderPL(v,c);
+  renderComp(v,c); renderLife(v,c); renderOrders(v,c); renderPL(v,c);
 }
 
 IDS.forEach(k=>{
